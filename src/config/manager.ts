@@ -10,6 +10,7 @@ import { Logger } from '../utils/logger';
 
 export class ConfigurationManager {
   private static config: MCPServerConfig | null = null;
+  private static readonly VALID_LLM_PROVIDERS = ['gemini', 'claude', 'openai', 'openrouter'] as const;
   
   static async loadConfiguration(): Promise<MCPServerConfig> {
     Logger.debug('Loading configuration from environment variables...');
@@ -55,11 +56,11 @@ export class ConfigurationManager {
     const provider = process.env.CONTEXT_OPT_LLM_PROVIDER?.toLowerCase();
     
     if (!provider) {
-      throw new Error('CONTEXT_OPT_LLM_PROVIDER environment variable is required. Set to "gemini", "claude", "openai", or "openrouter"');
+      throw new Error(`CONTEXT_OPT_LLM_PROVIDER environment variable is required. Set to ${this.VALID_LLM_PROVIDERS.map(p => `"${p}"`).join(', ')}`);
     }
     
-    if (!['gemini', 'claude', 'openai', 'openrouter'].includes(provider)) {
-      throw new Error(`Invalid CONTEXT_OPT_LLM_PROVIDER: ${provider}. Must be "gemini", "claude", "openai", or "openrouter"`);
+    if (!this.VALID_LLM_PROVIDERS.includes(provider as any)) {
+      throw new Error(`Invalid CONTEXT_OPT_LLM_PROVIDER: ${provider}. Must be ${this.VALID_LLM_PROVIDERS.map(p => `"${p}"`).join(', ')}`);
     }
     
     return provider as 'gemini' | 'claude' | 'openai' | 'openrouter';
@@ -109,7 +110,7 @@ export class ConfigurationManager {
       throw new Error('Configuration error: llm.provider is required');
     }
     
-    const validProviders = ['gemini', 'claude', 'openai', 'openrouter'];
+    const validProviders = [...this.VALID_LLM_PROVIDERS];
     if (!validProviders.includes(config.llm.provider)) {
       throw new Error(`Configuration error: llm.provider must be one of: ${validProviders.join(', ')}`);
     }
