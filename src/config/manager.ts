@@ -27,7 +27,8 @@ export class ConfigurationManager {
         ...(process.env.CONTEXT_OPT_LLM_MODEL && { model: process.env.CONTEXT_OPT_LLM_MODEL }),
         ...(process.env.CONTEXT_OPT_GEMINI_KEY && { geminiKey: process.env.CONTEXT_OPT_GEMINI_KEY }),
         ...(process.env.CONTEXT_OPT_CLAUDE_KEY && { claudeKey: process.env.CONTEXT_OPT_CLAUDE_KEY }),
-        ...(process.env.CONTEXT_OPT_OPENAI_KEY && { openaiKey: process.env.CONTEXT_OPT_OPENAI_KEY })
+        ...(process.env.CONTEXT_OPT_OPENAI_KEY && { openaiKey: process.env.CONTEXT_OPT_OPENAI_KEY }),
+        ...(process.env.CONTEXT_OPT_OPENROUTER_KEY && { openrouterKey: process.env.CONTEXT_OPT_OPENROUTER_KEY })
       },
       research: {
         ...(process.env.CONTEXT_OPT_EXA_KEY && { exaKey: process.env.CONTEXT_OPT_EXA_KEY })
@@ -50,18 +51,18 @@ export class ConfigurationManager {
     return config;
   }
   
-  private static getLLMProvider(): 'gemini' | 'claude' | 'openai' {
+  private static getLLMProvider(): 'gemini' | 'claude' | 'openai' | 'openrouter' {
     const provider = process.env.CONTEXT_OPT_LLM_PROVIDER?.toLowerCase();
     
     if (!provider) {
-      throw new Error('CONTEXT_OPT_LLM_PROVIDER environment variable is required. Set to "gemini", "claude", or "openai"');
+      throw new Error('CONTEXT_OPT_LLM_PROVIDER environment variable is required. Set to "gemini", "claude", "openai", or "openrouter"');
     }
     
-    if (!['gemini', 'claude', 'openai'].includes(provider)) {
-      throw new Error(`Invalid CONTEXT_OPT_LLM_PROVIDER: ${provider}. Must be "gemini", "claude", or "openai"`);
+    if (!['gemini', 'claude', 'openai', 'openrouter'].includes(provider)) {
+      throw new Error(`Invalid CONTEXT_OPT_LLM_PROVIDER: ${provider}. Must be "gemini", "claude", "openai", or "openrouter"`);
     }
     
-    return provider as 'gemini' | 'claude' | 'openai';
+    return provider as 'gemini' | 'claude' | 'openai' | 'openrouter';
   }
   
   private static parseAllowedBasePaths(): string[] {
@@ -108,7 +109,7 @@ export class ConfigurationManager {
       throw new Error('Configuration error: llm.provider is required');
     }
     
-    const validProviders = ['gemini', 'claude', 'openai'];
+    const validProviders = ['gemini', 'claude', 'openai', 'openrouter'];
     if (!validProviders.includes(config.llm.provider)) {
       throw new Error(`Configuration error: llm.provider must be one of: ${validProviders.join(', ')}`);
     }
@@ -210,7 +211,8 @@ export class ConfigurationManager {
         model: config.llm.model,
         hasGeminiKey: !!config.llm.geminiKey,
         hasClaudeKey: !!config.llm.claudeKey,
-        hasOpenaiKey: !!config.llm.openaiKey
+        hasOpenaiKey: !!config.llm.openaiKey,
+        hasOpenrouterKey: !!config.llm.openrouterKey
       },
       research: {
         hasExaKey: !!config.research.exaKey
