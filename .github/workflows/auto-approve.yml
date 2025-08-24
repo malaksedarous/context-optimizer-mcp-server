@@ -1,7 +1,7 @@
 name: Auto Approve Owner's PR
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
 
 permissions:
@@ -10,7 +10,9 @@ permissions:
 jobs:
   auto-approve:
     runs-on: ubuntu-latest
-    if: github.actor == github.event.repository.owner.login
+    if: >-
+      github.actor == github.event.repository.owner.login &&
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Approve pull request
         uses: hmarr/auto-approve-action@v3
