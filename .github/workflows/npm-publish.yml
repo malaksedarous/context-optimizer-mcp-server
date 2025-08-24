@@ -1,0 +1,63 @@
+name: Publish to npm
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write  # for npm provenance (optional)
+
+jobs:
+  build-and-publish:
+    # Avoid publishing from forks
+    if: github.repository_owner == 'malaksedarous'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test --silent
+
+      - name: Compute versions
+        id: versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg_name=$(node -p "require('./package.json').name")
+          pkg_version=$(node -p "require('./package.json').version")
+          published_version=$(npm view "$pkg_name" version 2>/dev/null || echo none)
+          echo "package_name=$pkg_name" >> "$GITHUB_OUTPUT"
+          echo "package_version=$pkg_version" >> "$GITHUB_OUTPUT"
+          echo "published_version=$published_version" >> "$GITHUB_OUTPUT"
+          echo "Package: $pkg_name"
+          echo "Local version: $pkg_version"
+          echo "Published version: $published_version"
+
+      - name: Skip publish (version unchanged)
+        if: steps.versions.outputs.published_version == steps.versions.outputs.package_version
+        run: echo "Version ${{ steps.versions.outputs.package_version }} already published; skipping."
+
+      - name: Publish to npm
+        if: steps.versions.outputs.published_version != steps.versions.outputs.package_version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --access public --provenance
