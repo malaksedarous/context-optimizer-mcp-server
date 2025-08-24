@@ -5,7 +5,7 @@
 
 import { BaseMCPTool, MCPToolResponse } from './base';
 import { ConfigurationManager } from '../config/manager';
-import { Exa } from 'exa-js';
+import Exa from 'exa-js';
 
 interface DeepResearchInput {
   topic: string;
@@ -93,6 +93,10 @@ export class DeepResearchTool extends BaseMCPTool {
         description: 'Schema with just the result in markdown.'
       };
 
+      if (!client?.research || typeof (client as any).research.createTask !== 'function') {
+        throw new Error('Exa.js SDK is outdated or incompatible. Please update exa-js to version 1.5.0 or newer.');
+      }
+
       this.logOperation('Creating Exa deep research task');
       const task = await client.research.createTask({
         instructions: topic,
@@ -101,7 +105,9 @@ export class DeepResearchTool extends BaseMCPTool {
       });
 
       this.logOperation(`Task created with ID: ${task.id}. Polling for results...`);
-      const result = await this.pollTask(client, task.id);
+      const result = typeof (client as any).research.pollTask === 'function'
+        ? await (client as any).research.pollTask(task.id)
+        : await this.pollTask(client, task.id);
       
       return this.formatResponse(result);
     } catch (error) {

@@ -5,6 +5,14 @@ All notable changes to the Context Optimizer MCP Server project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2025-08-24
+
+### Fixed
+- **Exa Research Integration:** Updated to `exa-js@^1.5.13`, switched to default import, and added compatibility with `research.pollTask`. Resolved runtime error `createTask is not a function` for `researchTopic` and `deepResearch` tools.
+
+### Changed
+- **VS Code MCP Config Guidance:** Documented how to point VS Code to the local `dist/server.js` for development instead of the globally installed package.
+
 ## [1.0.2] - 2025-08-08
 
 ### Fixed
