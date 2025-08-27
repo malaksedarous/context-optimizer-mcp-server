@@ -105,8 +105,8 @@ export class ResearchTopicTool extends BaseMCPTool {
       });
 
       this.logOperation(`Task created with ID: ${task.id}. Polling for results...`);
-      const result = typeof (client as any).research.pollTask === 'function'
-        ? await (client as any).research.pollTask(task.id)
+      const result = pollTaskFn
+        ? await pollTaskFn(task.id)
         : await this.pollTask(client, task.id);
       
       return this.formatResponse(result);
