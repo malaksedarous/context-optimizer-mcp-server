@@ -12,8 +12,27 @@ export class PathValidator {
   /**
    * Get the current platform (allows for easier testing)
    */
-  private static getPlatform(): NodeJS.Platform {
-    return process.platform;
+  static getPlatform(): NodeJS.Platform {
+    // Allow override for testing
+    const testPlatform = process.env.TEST_PLATFORM as NodeJS.Platform;
+    return testPlatform || process.platform;
+  }
+
+  /**
+   * Normalize a path string for OS-specific comparison
+   */
+  private static normalizeForComparison(p: string): string {
+    return this.getPlatform() === 'win32' ? p.toLowerCase() : p;
+  }
+
+  /**
+   * Checks if a resolved path is within a resolved base path (cross-platform, case-aware)
+   */
+  private static isWithinBase(resolvedPath: string, resolvedBase: string): boolean {
+    const normalizedPath = this.normalizeForComparison(resolvedPath);
+    const normalizedBase = this.normalizeForComparison(resolvedBase);
+    const baseWithSep = normalizedBase.endsWith(path.sep) ? normalizedBase : normalizedBase + path.sep;
+    return normalizedPath === normalizedBase || normalizedPath.startsWith(baseWithSep);
   }
 
   /**
@@ -34,11 +53,7 @@ export class PathValidator {
       // Check against allowed base paths
       const isAllowed = config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
-        // Use case-insensitive comparison on Windows
-        const normalizedPath = this.getPlatform() === 'win32' ? resolvedPath.toLowerCase() : resolvedPath;
-        const normalizedBase = this.getPlatform() === 'win32' ? resolvedBase.toLowerCase() : resolvedBase;
-        const basePlusSlash = normalizedBase + path.sep;
-        return normalizedPath.startsWith(basePlusSlash) || normalizedPath === normalizedBase;
+        return PathValidator.isWithinBase(resolvedPath, resolvedBase);
       });
       
       if (!isAllowed) {
@@ -102,11 +117,7 @@ export class PathValidator {
       // Check against allowed base paths
       const isAllowed = config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
-        // Use case-insensitive comparison on Windows
-        const normalizedPath = this.getPlatform() === 'win32' ? resolvedPath.toLowerCase() : resolvedPath;
-        const normalizedBase = this.getPlatform() === 'win32' ? resolvedBase.toLowerCase() : resolvedBase;
-        const basePlusSlash = normalizedBase + path.sep;
-        return normalizedPath.startsWith(basePlusSlash) || normalizedPath === normalizedBase;
+        return PathValidator.isWithinBase(resolvedPath, resolvedBase);
       });
       
       if (!isAllowed) {
@@ -157,7 +168,7 @@ export class PathValidator {
       
       return config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
-        return resolvedPath.startsWith(resolvedBase + path.sep) || resolvedPath === resolvedBase;
+        return PathValidator.isWithinBase(resolvedPath, resolvedBase);
       });
     } catch {
       return false;
