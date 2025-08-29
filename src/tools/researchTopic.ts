@@ -3,30 +3,18 @@
  * Ported from VS Code extension to MCP server
  */
 
-import { BaseMCPTool, MCPToolResponse } from './base';
+import { MCPToolResponse } from './base';
+import { BaseResearchTool } from './baseResearch';
 import { ConfigurationManager } from '../config/manager';
+import { ExaTask, ExaResponse } from '../types/exa';
+import { RESEARCH_CONFIG } from '../config/constants';
 import Exa from 'exa-js';
 
 interface ResearchTopicInput {
   topic: string;
 }
 
-interface ExaTask {
-  id: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  data?: {
-    result?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-interface ExaResponse {
-  result: string; // The report in markdown
-  raw: object;    // The full Exa.ai response
-}
-
-export class ResearchTopicTool extends BaseMCPTool {
+export class ResearchTopicTool extends BaseResearchTool {
   readonly name = 'researchTopic';
   readonly description = 'Conduct quick, focused web research on software development topics using Exa.ai\'s powerful research capabilities for current information and practical implementation guidance.';
 
@@ -100,59 +88,23 @@ export class ResearchTopicTool extends BaseMCPTool {
       this.logOperation('Creating Exa research task');
       const task = await client.research.createTask({
         instructions: topic,
-        model: 'exa-research', // Quick research model
+        model: RESEARCH_CONFIG.QUICK_RESEARCH.MODEL,
         output: { schema },
       });
 
       this.logOperation(`Task created with ID: ${task.id}. Polling for results...`);
-      const result = pollTaskFn
-        ? await pollTaskFn(task.id)
-        : await this.pollTask(client, task.id);
+      const result = await this.pollTaskWithFallback(
+        client, 
+        task.id, 
+        RESEARCH_CONFIG.QUICK_RESEARCH.MAX_ATTEMPTS,
+        RESEARCH_CONFIG.QUICK_RESEARCH.POLL_INTERVAL_MS,
+        RESEARCH_CONFIG.QUICK_RESEARCH.TIMEOUT_MS
+      );
       
       return this.formatResponse(result);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to conduct research with Exa.ai.';
       throw new Error(`Exa.ai research failed: ${errorMessage}`);
     }
-  }
-
-  private async pollTask(client: Exa, taskId: string): Promise<ExaTask> {
-    let attempts = 0;
-    const maxAttempts = 12; // 12 attempts * 10 seconds = 120 seconds timeout
-    
-    while (attempts < maxAttempts) {
-      const task = await client.research.getTask(taskId);
-      
-      if (task.status === 'completed') {
-        this.logOperation('Research task completed');
-        return task;
-      }
-      
-      if (task.status === 'failed') {
-        throw new Error('Research task failed');
-      }
-      
-      if (task.status === 'running' || task.status === 'pending') {
-        this.logOperation(`Task status: ${task.status}... (${attempts * 10}s elapsed)`);
-        await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
-        attempts++;
-      } else {
-        // Unexpected status
-        throw new Error(`Unexpected task status: ${task.status}`);
-      }
-    }
-    
-    // Timeout after 120 seconds
-    throw new Error('Research task timed out after 120 seconds');
-  }
-
-  private formatResponse(result: ExaTask): ExaResponse {
-    if (!result?.data?.result) {
-      throw new Error('Malformed response from Exa.ai - missing result data');
-    }
-    return {
-      result: result.data.result,
-      raw: result,
-    };
   }
 }

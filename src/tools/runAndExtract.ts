@@ -5,6 +5,7 @@ import { CommandValidator } from '../security/commandValidator';
 import { LLMProviderFactory } from '../providers/factory';
 import { ConfigurationManager } from '../config/manager';
 import { SessionManager } from '../session/manager';
+import { Logger } from '../utils/logger';
 
 export class RunAndExtractTool extends BaseMCPTool {
   readonly name = 'runAndExtract';
@@ -57,7 +58,7 @@ export class RunAndExtractTool extends BaseMCPTool {
       // Log warnings if any
       if (commandValidation.warnings) {
         for (const warning of commandValidation.warnings) {
-          console.warn(`⚠️ [${this.name}] Warning: ${warning}`);
+          Logger.warn(`${warning}`);
         }
       }
       
