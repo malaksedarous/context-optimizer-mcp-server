@@ -7,7 +7,7 @@ export const RESEARCH_CONFIG = {
   QUICK_RESEARCH: {
     POLL_INTERVAL_MS: 10000, // 10 seconds
     MAX_ATTEMPTS: 15,        // 15 attempts = 150 seconds total
-    TIMEOUT_MS: 120000,      // 120 seconds
+    TIMEOUT_MS: 200000,      // 200 seconds
     MODEL: 'exa-research'
   },
   
