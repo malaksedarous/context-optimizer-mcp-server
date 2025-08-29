@@ -126,6 +126,10 @@ npm test  # Now runs all tests including LLM integration
 npm run test:watch
 ```
 
+### Manual Testing
+
+For comprehensive end-to-end testing with an AI assistant, see the **[Manual Testing Setup Guide](docs/reference/manual-testing-setup.md)**. This provides a workflow-based testing protocol that validates all tools through realistic scenarios.
+
 For detailed testing setup, see **[docs/reference/testing.md](docs/reference/testing.md)**.
 
 ## Contributing

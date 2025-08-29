@@ -1,0 +1,38 @@
+# Special Characters Test File 🧪
+
+This file contains various special characters for testing Unicode handling:
+
+## Emojis and Symbols
+🔧 🚀 📝 🔍 ⚡ 🌟 💡 🔒 🎯 📊 🔄 ❌ ✅ 🛠️ 📋 🎨 🔗 📦 🌐 🔔
+
+## Unicode Characters
+• Bullet points with special chars: ★ ✓ ► ◄ ◆ ◇
+• Math symbols: ∀ ∃ ∈ ∉ ∞ ≠ ≤ ≥ ± ÷ × √
+• Currency: $ € £ ¥ ₹ ₽ ₩ ₴ ₿
+• Arrows: ← → ↑ ↓ ↔ ↕ ↖ ↗ ↘ ↙ ⇄ ⇅
+
+## Accented Characters
+• French: café, naïve, résumé, été, créé, préféré
+• German: Mädchen, Größe, weiß, Fuß, Straße
+• Spanish: niño, piña, mañana, corazón, años
+• Scandinavian: Åse, Øyvind, Lærer, Näs, Pöö
+
+## Special Punctuation
+• Quotes: „German" "English" «French» 'Single' ‚Low'
+• Dashes: – en-dash, — em-dash, ... ellipsis
+• Other: ¿Qué? ¡Hola! § ¶ © ® ™ °C °F
+
+## Whitespace and Control-like
+• Various spaces: regular space, thin space , non-breaking space 
+• Tabs:	tabbed	content	here
+• Zero-width chars: ﻿﻿﻿ (if they display)
+
+## Mixed Content
+```javascript
+// Code with special chars
+const message = "Hello 🌍! This is a test with émojis and spéciál characters";
+const price = "€29.99";
+const formula = "E = mc²";
+```
+
+This file tests encoding, special character handling, and Unicode support across different language sets and symbol categories.

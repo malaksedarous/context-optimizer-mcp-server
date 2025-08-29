@@ -283,13 +283,75 @@ npm test -- --coverage
 open coverage/lcov-report/index.html
 ```
 
-## Test Data Management
+## Manual Testing Protocol
 
-Tests use temporary files and directories that are automatically cleaned up. Test data includes:
+For comprehensive end-to-end testing with AI assistants, we provide a workflow-based manual testing protocol that validates all tools through realistic scenarios.
 
-- Sample code files for analysis
-- Mock terminal command outputs
-- Temporary session files
-- Test configuration files
+### Overview
 
-All test data is isolated and doesn't affect the main system or other test runs.
+The manual testing system consists of two documents:
+
+1. **[Manual Testing Setup Guide](manual-testing-setup.md)** - For human users to prepare the testing environment
+2. **[Manual Testing Protocol](manual-testing-protocol.md)** - For AI assistants to execute systematically
+
+### When to Use Manual Testing
+
+- **Before releases**: Validate all functionality end-to-end
+- **After major changes**: Ensure tools still work together correctly
+- **With new AI assistants**: Verify compatibility with different MCP clients
+- **When integration tests can't cover**: Real-world usage patterns and edge cases
+
+### Manual Testing Approach
+
+The protocol uses **workflow-based testing** instead of individual tool testing:
+
+#### 3 Main Workflows
+1. **Development Analysis Pipeline** (4 steps)
+   - File analysis → Security audit → Follow-up → Research
+   - Tests: `askAboutFile`, `runAndExtract`, `askFollowUp`, `researchTopic`
+
+2. **Code Quality and Build Assessment** (4 steps)
+   - Config analysis → Build execution → Build follow-up → Architecture research
+   - Tests: `askAboutFile`, `runAndExtract`, `askFollowUp`, `deepResearch`
+
+3. **Repository State and Git Analysis** (4 steps)
+   - Git status → History follow-up → Documentation → Workflow research
+   - Tests: `runAndExtract`, `askFollowUp`, `askAboutFile`, `researchTopic`
+
+#### Focused Failure Testing (6 tests)
+- Security path validation
+- Command filtering
+- Session error handling
+- Timeout handling
+- Large file handling
+- API key validation
+
+#### Edge Case Testing (3 tests)
+- Unicode character handling
+- Rapid tool succession
+- Network connectivity issues
+
+### Benefits of Manual Testing
+
+- **Real Usage Patterns**: Tests how tools actually work together
+- **Context Optimization Validation**: Ensures responses stay focused and don't flood context
+- **Assistant Compatibility**: Validates with actual AI assistants (VS Code, Claude Desktop, Cursor)
+- **Human-readable Results**: Clear pass/fail criteria and detailed reporting
+- **Comprehensive Coverage**: 40% fewer test cases while maintaining full functionality coverage
+
+### Setup Instructions
+
+1. **Complete environment setup** using the [Manual Testing Setup Guide](manual-testing-setup.md)
+2. **Provide the testing prompt** to your AI assistant (included in setup guide)
+3. **Monitor progress** and review the structured report generated
+
+### Safety Features
+
+- **Stop-on-failure rule**: Assistant stops if >50% of tests fail after 3 tool calls
+- **No file creation**: Uses only existing repository files
+- **Security validation**: Tests include dangerous command and path validation
+- **Network testing**: Optional network connectivity testing with clear instructions
+
+The manual testing protocol provides confidence that all tools work correctly in realistic scenarios while maintaining the context optimization benefits that make this MCP server valuable.
+
+---
