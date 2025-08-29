@@ -56,27 +56,21 @@ jobs:
 
       - name: Publish to npm
         if: steps.versions.outputs.published_version != steps.versions.outputs.package_version
-        env:
-          # Only use token if Trusted Publishing fails
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "Publishing version ${{ steps.versions.outputs.package_version }} to npm using Trusted Publishing..."
           echo "Repository: ${{ github.repository }}"
           echo "Workflow: ${{ github.workflow }}"
           echo "Actor: ${{ github.actor }}"
           
-          # Try Trusted Publishing first
-          if npm publish --access public --provenance 2>/dev/null; then
+          # Publish using Trusted Publishing with OIDC
+          echo "🔄 Publishing with Trusted Publishing..."
+          if npm_output=$(npm publish --access public --provenance 2>&1); then
             echo "✅ Published successfully with Trusted Publishing"
+            echo "$npm_output"
           else
-            echo "⚠️ Trusted Publishing failed, checking if fallback token is available..."
-            if [ -n "$NODE_AUTH_TOKEN" ]; then
-              echo "🔄 Retrying with token authentication..."
-              npm config set registry https://registry.npmjs.org/
-              npm config set //registry.npmjs.org/:_authToken $NODE_AUTH_TOKEN
-              npm publish --access public --provenance
-            else
-              echo "❌ No fallback token available. Please check Trusted Publishing configuration."
-              exit 1
-            fi
+            exit_code=$?
+            echo "❌ Trusted Publishing failed with exit code: $exit_code"
+            echo "Error output:"
+            echo "$npm_output"
+            exit $exit_code
           fi
