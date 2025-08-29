@@ -201,7 +201,7 @@ describe('PathValidator', () => {
     beforeEach(() => {
       mockedConfigManager.getConfig.mockReturnValue({
         security: {
-          allowedBasePaths: ['C\\Test\\Projects'], // Uppercase
+          allowedBasePaths: ['C:\\Test\\Projects'], // Uppercase
           maxFileSize: 1000000,
           commandTimeout: 30000,
           sessionTimeout: 1800000
