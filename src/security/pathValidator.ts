@@ -13,9 +13,7 @@ export class PathValidator {
    * Get the current platform (allows for easier testing)
    */
   static getPlatform(): NodeJS.Platform {
-    // Allow override for testing
-    const testPlatform = process.env.TEST_PLATFORM as NodeJS.Platform;
-    return testPlatform || process.platform;
+    return process.platform;
   }
 
   /**
@@ -36,48 +34,6 @@ export class PathValidator {
   }
 
   /**
-   * When on Windows (or simulating it in tests), resolve a path to the actual
-   * filesystem-cased path under a known base by walking directories case-insensitively.
-   * On non-Windows this is a no-op unless TEST_PLATFORM=win32.
-   */
-  private static async resolveCaseInsensitiveUnderBase(targetPath: string, basePath: string): Promise<string> {
-    // If not Windows mode, or path already exists, return as-is
-    if (this.getPlatform() !== 'win32') {
-      return targetPath;
-    }
-    try {
-      await fs.stat(targetPath);
-      return targetPath; // already exists
-    } catch {
-      // continue to attempt case-insensitive resolution
-    }
-
-    // Ensure target is within base
-    if (!this.isWithinBase(targetPath, basePath)) {
-      return targetPath;
-    }
-
-    // Walk from base using directory listings to find actual-cased entries
-    const rel = path.relative(basePath, targetPath);
-    const segments = rel.split(path.sep).filter(Boolean);
-    let current = basePath;
-    for (const seg of segments) {
-      try {
-        const entries = await fs.readdir(current, { withFileTypes: true });
-        const match = entries.find(e => e.name.toLowerCase() === seg.toLowerCase());
-        if (!match) {
-          // If segment not found, bail out and return original target
-          return targetPath;
-        }
-        current = path.join(current, match.name);
-      } catch {
-        return targetPath;
-      }
-    }
-    return current;
-  }
-
-  /**
    * Validates a file path against security boundaries
    * 
    * @param requestedPath - Path to validate
@@ -92,13 +48,10 @@ export class PathValidator {
       const config = ConfigurationManager.getConfig();
       const resolvedPath = path.resolve(requestedPath);
       
-      // Check against allowed base paths and capture matched base
-      let matchedBase: string | null = null;
+      // Check against allowed base paths
       const isAllowed = config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
-        const within = PathValidator.isWithinBase(resolvedPath, resolvedBase);
-        if (within && matchedBase === null) matchedBase = resolvedBase;
-        return within;
+        return PathValidator.isWithinBase(resolvedPath, resolvedBase);
       });
       
       if (!isAllowed) {
@@ -108,16 +61,13 @@ export class PathValidator {
         };
       }
       
-      // On Windows mode, resolve actual filesystem-cased path to allow case-insensitive requests
-      const fsPath = matchedBase ? await PathValidator.resolveCaseInsensitiveUnderBase(resolvedPath, matchedBase) : resolvedPath;
-
       // Check if file exists
       try {
-        const stats = await fs.stat(fsPath);
+        const stats = await fs.stat(resolvedPath);
         if (!stats.isFile()) {
           return {
             valid: false,
-            error: `Path '${fsPath}' is not a file`
+            error: `Path '${resolvedPath}' is not a file`
           };
         }
         
@@ -125,19 +75,19 @@ export class PathValidator {
         if (stats.size > config.security.maxFileSize) {
           return {
             valid: false,
-            error: `File '${fsPath}' exceeds maximum size limit (${config.security.maxFileSize} bytes)`
+            error: `File '${resolvedPath}' exceeds maximum size limit (${config.security.maxFileSize} bytes)`
           };
         }
       } catch {
         return {
           valid: false,
-          error: `File '${fsPath}' does not exist or is not accessible`
+          error: `File '${resolvedPath}' does not exist or is not accessible`
         };
       }
       
       return {
         valid: true,
-        resolvedPath: fsPath
+        resolvedPath
       };
     } catch (error) {
       return {
@@ -162,13 +112,10 @@ export class PathValidator {
       const config = ConfigurationManager.getConfig();
       const resolvedPath = path.resolve(requestedPath);
       
-      // Check against allowed base paths and capture matched base
-      let matchedBase: string | null = null;
+      // Check against allowed base paths
       const isAllowed = config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
-        const within = PathValidator.isWithinBase(resolvedPath, resolvedBase);
-        if (within && matchedBase === null) matchedBase = resolvedBase;
-        return within;
+        return PathValidator.isWithinBase(resolvedPath, resolvedBase);
       });
       
       if (!isAllowed) {
@@ -178,28 +125,25 @@ export class PathValidator {
         };
       }
       
-      // On Windows mode, resolve actual filesystem-cased path to allow case-insensitive requests
-      const fsPath = matchedBase ? await PathValidator.resolveCaseInsensitiveUnderBase(resolvedPath, matchedBase) : resolvedPath;
-
       // Check if directory exists
       try {
-        const stats = await fs.stat(fsPath);
+        const stats = await fs.stat(resolvedPath);
         if (!stats.isDirectory()) {
           return {
             valid: false,
-            error: `Path '${fsPath}' is not a directory`
+            error: `Path '${resolvedPath}' is not a directory`
           };
         }
       } catch {
         return {
           valid: false,
-          error: `Directory '${fsPath}' does not exist or is not accessible`
+          error: `Directory '${resolvedPath}' does not exist or is not accessible`
         };
       }
       
       return {
         valid: true,
-        resolvedPath: fsPath
+        resolvedPath
       };
     } catch (error) {
       return {
