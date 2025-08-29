@@ -283,6 +283,17 @@ npm test -- --coverage
 open coverage/lcov-report/index.html
 ```
 
+## Test Data Management
+
+Tests use temporary files and directories that are automatically cleaned up. Test data includes:
+
+- Sample code files for analysis
+- Mock terminal command outputs
+- Temporary session files
+- Test configuration files
+
+All test data is isolated and doesn't affect the main system or other test runs.
+
 ## Manual Testing Protocol
 
 For comprehensive end-to-end testing with AI assistants, we provide a workflow-based manual testing protocol that validates all tools through realistic scenarios.

@@ -5,6 +5,7 @@ This document provides workflow-based testing that comprehensively validates all
 Important constraints:
 - Do not create any files; use only files already in this repository.
 - If a required file for a test is not available, ask the user to provide one or point to an alternative file, then proceed.
+- Replace `$PROJECT_ROOT` in all examples with your actual project path (e.g., `/home/user/context-optimizer-mcp-server` on Linux/Mac or `C:\Users\username\context-optimizer-mcp-server` on Windows)
 
 ---
 
@@ -17,7 +18,7 @@ Important constraints:
 ### Step 1.1: Project Configuration Analysis
 ```
 mcp_context-optim_askAboutFile with:
-- filePath: "c:\Projects\context-optimizer-mcp-server\package.json"
+- filePath: "$PROJECT_ROOT/package.json"
 - question: "What are the main dependencies and scripts? Are there any development vs production dependencies?"
 ```
 **Expected**: Package structure, dependency categorization, script purposes identified
@@ -27,7 +28,7 @@ mcp_context-optim_askAboutFile with:
 mcp_context-optim_runAndExtract with:
 - terminalCommand: "npm audit --audit-level=moderate"
 - extractionPrompt: "Summarize security vulnerabilities found. What are the severity levels and which packages are affected?"
-- workingDirectory: "c:\Projects\context-optimizer-mcp-server"
+- workingDirectory: "$PROJECT_ROOT"
 ```
 **Expected**: Security analysis without full audit output, session created for follow-up
 
@@ -63,7 +64,7 @@ mcp_context-optim_researchTopic with:
 ### Step 2.1: TypeScript Configuration Review
 ```
 mcp_context-optim_askAboutFile with:
-- filePath: "c:\Projects\context-optimizer-mcp-server\tsconfig.json"
+- filePath: "$PROJECT_ROOT/tsconfig.json"
 - question: "What are the target, module, and strict settings? Are there any special compilation options configured?"
 ```
 **Expected**: Specific configuration details, clear explanation of settings
@@ -73,7 +74,7 @@ mcp_context-optim_askAboutFile with:
 mcp_context-optim_runAndExtract with:
 - terminalCommand: "npm run build"
 - extractionPrompt: "Did the build succeed? Report any warnings, errors, or notable compilation information."
-- workingDirectory: "c:\Projects\context-optimizer-mcp-server"
+- workingDirectory: "$PROJECT_ROOT"
 ```
 **Expected**: Build status, key issues without verbose logs, session for follow-up
 
@@ -111,7 +112,7 @@ mcp_context-optim_deepResearch with:
 mcp_context-optim_runAndExtract with:
 - terminalCommand: "git status --porcelain && git log --oneline -5"
 - extractionPrompt: "What is the current repository state? Are there uncommitted changes? What are the recent commits about?"
-- workingDirectory: "c:\Projects\context-optimizer-mcp-server"
+- workingDirectory: "$PROJECT_ROOT"
 ```
 **Expected**: Repository state summary, recent activity overview
 
@@ -125,7 +126,7 @@ mcp_context-optim_askFollowUp with:
 ### Step 3.3: Project Documentation Analysis
 ```
 mcp_context-optim_askAboutFile with:
-- filePath: "c:\Projects\context-optimizer-mcp-server\README.md"
+- filePath: "$PROJECT_ROOT/README.md"
 - question: "What is the main purpose and key features of this project? What special characters or emojis are used for formatting?"
 ```
 **Expected**: Project overview plus Unicode/emoji handling test
@@ -155,7 +156,7 @@ mcp_context-optim_researchTopic with:
 ### Failure Test 1: Security Path Validation
 ```
 mcp_context-optim_askAboutFile with:
-- filePath: "C:\Windows\System32\drivers\etc\hosts"
+- filePath: "/etc/passwd"  # On Unix/Linux/Mac, use "C:\Windows\System32\drivers\etc\hosts" on Windows
 - question: "What does this file contain?"
 ```
 **Expected**: Security error, clear rejection message, no file access
@@ -163,9 +164,9 @@ mcp_context-optim_askAboutFile with:
 ### Failure Test 2: Command Security Filtering
 ```
 mcp_context-optim_runAndExtract with:
-- terminalCommand: "rm -rf /"
+- terminalCommand: "rm -rf /"  # On Unix/Linux/Mac, use "rmdir /s C:\" on Windows
 - extractionPrompt: "What happened?"
-- workingDirectory: "c:\Projects\context-optimizer-mcp-server"
+- workingDirectory: "$PROJECT_ROOT"
 ```
 **Expected**: Command blocked, security explanation, no execution
 
@@ -179,16 +180,16 @@ mcp_context-optim_askFollowUp with:
 ### Failure Test 4: Command Timeout
 ```
 mcp_context-optim_runAndExtract with:
-- terminalCommand: "powershell -Command Start-Sleep -Seconds 35"
+- terminalCommand: "sleep 35"  # On Unix/Linux/Mac, use "powershell -Command Start-Sleep -Seconds 35" on Windows
 - extractionPrompt: "Did the command complete?"
-- workingDirectory: "c:\Projects\context-optimizer-mcp-server"
+- workingDirectory: "$PROJECT_ROOT"
 ```
 **Expected**: Timeout error, no hanging processes
 
 ### Failure Test 5: Large File Handling
 ```
 mcp_context-optim_askAboutFile with:
-- filePath: "c:\Projects\context-optimizer-mcp-server\MCP Specs\Combined-Spec-2025-06-18.md"
+- filePath: "$PROJECT_ROOT/MCP Specs/Combined-Spec-2025-06-18.md"
 - question: "What is the general structure of this document?"
 ```
 **Expected**: Appropriate handling (process or reject with size message), no crashes
@@ -219,7 +220,7 @@ mcp_context-optim_researchTopic with:
 ### Edge Test 1: Special Characters and Encoding
 ```
 mcp_context-optim_askAboutFile with:
-- filePath: "c:\Projects\context-optimizer-mcp-server\README.md"
+- filePath: "$PROJECT_ROOT/README.md"
 - question: "List all emojis and special Unicode characters found in this file. Test encoding handling."
 ```
 **Expected**: Proper Unicode handling, no character corruption
@@ -230,13 +231,13 @@ Execute quickly in sequence:
 1. mcp_context-optim_runAndExtract with:
    - terminalCommand: "node --version"
    - extractionPrompt: "What version?"
-   - workingDirectory: "c:\Projects\context-optimizer-mcp-server"
+   - workingDirectory: "$PROJECT_ROOT"
 
 2. mcp_context-optim_askFollowUp with:
    - question: "Is this a recent version?"
 
 3. mcp_context-optim_askAboutFile with:
-   - filePath: "c:\Projects\context-optimizer-mcp-server\package.json"
+   - filePath: "$PROJECT_ROOT/package.json"
    - question: "What Node.js version is required?"
 ```
 **Expected**: Proper session management, no conflicts between tools
