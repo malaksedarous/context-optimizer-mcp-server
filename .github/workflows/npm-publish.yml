@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
       - name: Install dependencies
@@ -57,6 +56,27 @@ jobs:
 
       - name: Publish to npm
         if: steps.versions.outputs.published_version != steps.versions.outputs.package_version
+        env:
+          # Only use token if Trusted Publishing fails
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "Publishing version ${{ steps.versions.outputs.package_version }} to npm using Trusted Publishing..."
-          npm publish --access public --provenance
+          echo "Repository: ${{ github.repository }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Actor: ${{ github.actor }}"
+          
+          # Try Trusted Publishing first
+          if npm publish --access public --provenance 2>/dev/null; then
+            echo "✅ Published successfully with Trusted Publishing"
+          else
+            echo "⚠️ Trusted Publishing failed, checking if fallback token is available..."
+            if [ -n "$NODE_AUTH_TOKEN" ]; then
+              echo "🔄 Retrying with token authentication..."
+              npm config set registry https://registry.npmjs.org/
+              npm config set //registry.npmjs.org/:_authToken $NODE_AUTH_TOKEN
+              npm publish --access public --provenance
+            else
+              echo "❌ No fallback token available. Please check Trusted Publishing configuration."
+              exit 1
+            fi
+          fi
