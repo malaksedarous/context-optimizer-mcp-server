@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # for npm provenance (optional)
+  id-token: write  # Required for npm trusted publishing and provenance
 
 jobs:
   build-and-publish:
@@ -57,7 +57,6 @@ jobs:
 
       - name: Publish to npm
         if: steps.versions.outputs.published_version != steps.versions.outputs.package_version
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          echo "Publishing version ${{ steps.versions.outputs.package_version }} to npm using Trusted Publishing..."
           npm publish --access public --provenance
