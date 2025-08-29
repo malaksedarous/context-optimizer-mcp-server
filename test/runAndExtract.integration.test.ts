@@ -29,7 +29,7 @@ describe('RunAndExtractTool Integration', () => {
     
     process.env.CONTEXT_OPT_ALLOWED_PATHS = process.cwd();
     process.env.CONTEXT_OPT_EXA_KEY = process.env.CONTEXT_OPT_EXA_KEY || 'test-key';
-    process.env.CONTEXT_OPT_LOG_LEVEL = 'info';
+    process.env.CONTEXT_OPT_LOG_LEVEL = 'error';
     
     await ConfigurationManager.loadConfiguration();
     tool = new RunAndExtractTool();

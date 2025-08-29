@@ -10,6 +10,13 @@ import { ConfigurationManager } from '../config/manager';
 
 export class PathValidator {
   /**
+   * Get the current platform (allows for easier testing)
+   */
+  private static getPlatform(): NodeJS.Platform {
+    return process.platform;
+  }
+
+  /**
    * Validates a file path against security boundaries
    * 
    * @param requestedPath - Path to validate
@@ -28,8 +35,8 @@ export class PathValidator {
       const isAllowed = config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
         // Use case-insensitive comparison on Windows
-        const normalizedPath = process.platform === 'win32' ? resolvedPath.toLowerCase() : resolvedPath;
-        const normalizedBase = process.platform === 'win32' ? resolvedBase.toLowerCase() : resolvedBase;
+        const normalizedPath = this.getPlatform() === 'win32' ? resolvedPath.toLowerCase() : resolvedPath;
+        const normalizedBase = this.getPlatform() === 'win32' ? resolvedBase.toLowerCase() : resolvedBase;
         const basePlusSlash = normalizedBase + path.sep;
         return normalizedPath.startsWith(basePlusSlash) || normalizedPath === normalizedBase;
       });
@@ -96,8 +103,8 @@ export class PathValidator {
       const isAllowed = config.security.allowedBasePaths.some(basePath => {
         const resolvedBase = path.resolve(basePath);
         // Use case-insensitive comparison on Windows
-        const normalizedPath = process.platform === 'win32' ? resolvedPath.toLowerCase() : resolvedPath;
-        const normalizedBase = process.platform === 'win32' ? resolvedBase.toLowerCase() : resolvedBase;
+        const normalizedPath = this.getPlatform() === 'win32' ? resolvedPath.toLowerCase() : resolvedPath;
+        const normalizedBase = this.getPlatform() === 'win32' ? resolvedBase.toLowerCase() : resolvedBase;
         const basePlusSlash = normalizedBase + path.sep;
         return normalizedPath.startsWith(basePlusSlash) || normalizedPath === normalizedBase;
       });
