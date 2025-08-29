@@ -53,7 +53,7 @@ netsh interface set interface "Ethernet" admin=enable
 # List devices to identify Wi-Fi/Ethernet names
 networksetup -listallhardwareports
 
-# Disable/Enable Wi‑Fi via networksetup (preferred)
+# Disable/Enable Wi-Fi via networksetup (preferred)
 sudo networksetup -setairportpower "Wi-Fi" off
 sudo networksetup -setairportpower "Wi-Fi" on
 
