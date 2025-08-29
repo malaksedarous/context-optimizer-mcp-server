@@ -197,11 +197,13 @@ describe('PathValidator', () => {
   });
 
   describe('Windows Case Sensitivity', () => {
-    let getPlatformSpy: jest.SpyInstance;
+    let originalTestPlatform: string | undefined;
     
     beforeEach(() => {
-      // Mock the getPlatform method to return 'win32'
-      getPlatformSpy = jest.spyOn(PathValidator as any, 'getPlatform').mockReturnValue('win32');
+      // Store original test platform environment variable
+      originalTestPlatform = process.env.TEST_PLATFORM;
+      // Set test platform to Windows
+      process.env.TEST_PLATFORM = 'win32';
       
       mockedConfigManager.getConfig.mockReturnValue({
         security: {
@@ -258,9 +260,11 @@ describe('PathValidator', () => {
     });
 
     afterEach(() => {
-      // Restore the original getPlatform method
-      if (getPlatformSpy) {
-        getPlatformSpy.mockRestore();
+      // Restore original test platform environment variable
+      if (originalTestPlatform !== undefined) {
+        process.env.TEST_PLATFORM = originalTestPlatform;
+      } else {
+        delete process.env.TEST_PLATFORM;
       }
     });
   });
