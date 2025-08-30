@@ -13,6 +13,7 @@ jobs:
     # Avoid publishing from forks
     if: github.repository_owner == 'malaksedarous'
     runs-on: ubuntu-latest
+    environment: npm-publish  # Optional: matches environment name in npm settings
 
     steps:
       - name: Checkout repository
