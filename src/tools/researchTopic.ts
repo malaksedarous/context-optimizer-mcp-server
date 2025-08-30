@@ -86,27 +86,16 @@ export class ResearchTopicTool extends BaseResearchTool {
       }
 
       const research: any = (client as any).research;
+      const hasNewAPI = typeof research.create === 'function';
+      const hasOldAPI = typeof research.createTask === 'function';
+
+      if (!hasNewAPI && !hasOldAPI) {
+        throw new Error('Exa.js research client missing both create() and createTask() methods');
+      }
 
       // Prefer newer create() API; fall back to createTask()
-      const createFn: ((params: any) => Promise<ExaTask>) | null =
-        typeof research.create === 'function'
-          ? research.create.bind(research)
-          : typeof research.createTask === 'function'
-            ? research.createTask.bind(research)
-            : null;
-
-      if (!createFn) {
-        // Try to surface the installed exa-js version for easier debugging
-        let installedVersion = 'unknown';
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
-          const pkg = require('exa-js/package.json');
-          installedVersion = pkg && pkg.version ? String(pkg.version) : installedVersion;
-        } catch (e) {
-          // ignore
-        }
-        throw new Error(`Exa.js SDK is incompatible (installed: ${installedVersion}). Missing research.create/createTask.`);
-      }
+      const createFn: ((params: any) => Promise<ExaTask>) =
+        hasNewAPI ? research.create.bind(research) : research.createTask.bind(research);
 
       this.logOperation('Creating Exa research task');
       const task = await createFn({
