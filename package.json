@@ -1,6 +1,6 @@
 {
   "name": "context-optimizer-mcp-server",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Context optimization tools MCP server for AI coding assistants - compatible with GitHub Copilot, Cursor AI, and other MCP-supporting assistants",
   "main": "dist/server.js",
   "bin": {
