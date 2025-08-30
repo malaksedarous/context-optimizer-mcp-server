@@ -25,7 +25,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
+
+      - name: Update npm (required for Trusted Publishing)
+        run: npm install -g npm@latest
+
+      - name: Show Node and npm versions
+        run: |
+          node -v
+          npm -v
 
       - name: Install dependencies
         run: npm ci
@@ -65,7 +74,7 @@ jobs:
           
           # Publish using Trusted Publishing with OIDC
           echo "🔄 Publishing with Trusted Publishing..."
-          if npm_output=$(npm publish --access public --provenance 2>&1); then
+          if npm_output=$(npm publish --access public 2>&1); then
             echo "✅ Published successfully with Trusted Publishing"
             echo "$npm_output"
           else
