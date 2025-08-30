@@ -81,12 +81,32 @@ export class DeepResearchTool extends BaseResearchTool {
         description: 'Schema with just the result in markdown.'
       };
 
-      if (!client?.research || typeof (client as any).research.createTask !== 'function') {
-        throw new Error('Exa.js SDK is outdated or incompatible. Please update exa-js to version 1.5.0 or newer.');
+      if (!client?.research) {
+        throw new Error('Exa.js research client not available on Exa instance.');
+      }
+
+      const research: any = (client as any).research;
+      const createFn: ((params: any) => Promise<ExaTask>) | null =
+        typeof research.create === 'function'
+          ? research.create.bind(research)
+          : typeof research.createTask === 'function'
+            ? research.createTask.bind(research)
+            : null;
+
+      if (!createFn) {
+        let installedVersion = 'unknown';
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+          const pkg = require('exa-js/package.json');
+          installedVersion = pkg && pkg.version ? String(pkg.version) : installedVersion;
+        } catch (e) {
+          // ignore
+        }
+        throw new Error(`Exa.js SDK is incompatible (installed: ${installedVersion}). Missing research.create/createTask.`);
       }
 
       this.logOperation('Creating Exa deep research task');
-      const task = await client.research.createTask({
+      const task = await createFn({
         instructions: topic,
         model: RESEARCH_CONFIG.DEEP_RESEARCH.MODEL,
         output: { schema },

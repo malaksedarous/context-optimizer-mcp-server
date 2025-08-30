@@ -13,9 +13,20 @@ export abstract class BaseResearchTool extends BaseMCPTool {
    */
   protected async pollTask(client: Exa, taskId: string, maxAttempts: number, pollIntervalMs: number, timeoutMs: number): Promise<ExaTask> {
     let attempts = 0;
-    
+    const research: any = (client as any).research;
+    const getFn: ((id: string) => Promise<ExaTask>) | null =
+      research && typeof research.getTask === 'function'
+        ? research.getTask.bind(research)
+        : research && typeof research.get === 'function'
+          ? research.get.bind(research)
+          : null;
+
+    if (!getFn) {
+      throw new Error('Exa research client does not expose getTask/get methods to fetch task status.');
+    }
+
     while (attempts < maxAttempts) {
-      const task = await client.research.getTask(taskId);
+      const task = await getFn(taskId);
       
       if (task.status === 'completed') {
         this.logOperation('Research task completed');
@@ -64,10 +75,15 @@ export abstract class BaseResearchTool extends BaseMCPTool {
     pollIntervalMs: number, 
     timeoutMs: number
   ): Promise<ExaTask> {
-    // Use type assertion with specific property check for better type safety
-    const clientWithPollTask = client as Exa & { research: { pollTask?: (taskId: string) => Promise<ExaTask> } };
-    if (clientWithPollTask.research.pollTask) {
-      return await clientWithPollTask.research.pollTask(taskId);
+    // Prefer SDK-provided pollers if available, else fall back to local polling
+    const research: any = (client as any).research;
+    if (research) {
+      if (typeof research.pollTask === 'function') {
+        return await research.pollTask(taskId);
+      }
+      if (typeof research.pollUntilFinished === 'function') {
+        return await research.pollUntilFinished(taskId);
+      }
     }
     return await this.pollTask(client, taskId, maxAttempts, pollIntervalMs, timeoutMs);
   }
