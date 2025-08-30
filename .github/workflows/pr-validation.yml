@@ -43,23 +43,39 @@ jobs:
           echo "Local version: $pkg_version"
           echo "Published version: $published_version"
           
-          # Use Node.js to compare semantic versions
-          comparison_result=$(node -e "
-            const semver = require('semver');
+          # Use Node.js built-in functionality to compare semantic versions
+          node -e "
             const localVer = '$pkg_version';
             const publishedVer = '$published_version';
             
-            if (!semver.valid(localVer)) {
+            // Basic semantic version validation (x.y.z format)
+            const versionPattern = /^(\d+)\.(\d+)\.(\d+)$/;
+            
+            if (!versionPattern.test(localVer)) {
               console.error('Invalid local version format:', localVer);
               process.exit(1);
             }
             
-            if (publishedVer !== '0.0.0' && !semver.valid(publishedVer)) {
+            if (publishedVer !== '0.0.0' && !versionPattern.test(publishedVer)) {
               console.error('Invalid published version format:', publishedVer);
               process.exit(1);
             }
             
-            if (semver.gt(localVer, publishedVer)) {
+            // Parse versions into comparable numbers
+            const parseVersion = (v) => {
+              const [, major, minor, patch] = v.match(versionPattern);
+              return [parseInt(major), parseInt(minor), parseInt(patch)];
+            };
+            
+            const [localMajor, localMinor, localPatch] = parseVersion(localVer);
+            const [pubMajor, pubMinor, pubPatch] = parseVersion(publishedVer);
+            
+            // Compare versions
+            const isGreater = localMajor > pubMajor || 
+              (localMajor === pubMajor && localMinor > pubMinor) ||
+              (localMajor === pubMajor && localMinor === pubMinor && localPatch > pubPatch);
+            
+            if (isGreater) {
               console.log('✅ Version validation passed: ' + localVer + ' > ' + publishedVer);
               process.exit(0);
             } else {
@@ -67,7 +83,7 @@ jobs:
               console.error('Please increment the version in package.json');
               process.exit(1);
             }
-          ")
+          "
 
       - name: Build
         run: npm run build
