@@ -81,24 +81,13 @@ export class DeepResearchTool extends BaseResearchTool {
         description: 'Schema with just the result in markdown.'
       };
 
-      if (!client?.research) {
-        throw new Error('Exa.js research client not available on Exa instance.');
+      if (!client?.research || typeof (client as any).research.create !== 'function') {
+        throw new Error('Exa.js research client missing create() method');
       }
-
       const research: any = (client as any).research;
-      const hasNewAPI = typeof research.create === 'function';
-      const hasOldAPI = typeof research.createTask === 'function';
-
-      if (!hasNewAPI && !hasOldAPI) {
-        throw new Error('Exa.js research client missing both create() and createTask() methods');
-      }
-
-      // Prefer newer create() API; fall back to createTask()
-      const createFn: ((params: any) => Promise<ExaTask>) =
-        hasNewAPI ? research.create.bind(research) : research.createTask.bind(research);
 
       this.logOperation('Creating Exa deep research task');
-      const task = await createFn({
+  const task = await research.create({
         instructions: topic,
         model: RESEARCH_CONFIG.DEEP_RESEARCH.MODEL,
         output: { schema },

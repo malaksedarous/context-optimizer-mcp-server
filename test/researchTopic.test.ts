@@ -138,8 +138,8 @@ describe('ResearchTopicTool', () => {
 
       const mockExaClient = {
         research: {
-          createTask: jest.fn().mockResolvedValue({ id: 'task-123' }),
-          getTask: jest.fn().mockResolvedValue(mockTask)
+          create: jest.fn().mockResolvedValue({ id: 'task-123' }),
+          get: jest.fn().mockResolvedValue(mockTask)
         }
       };
       
@@ -152,7 +152,7 @@ describe('ResearchTopicTool', () => {
       if (result.content[0]) {
         expect(result.content[0].text).toContain('Quick Research Results');
       }
-      expect(mockExaClient.research.createTask).toHaveBeenCalledWith({
+  expect(mockExaClient.research.create).toHaveBeenCalledWith({
         instructions: 'Simple research topic',
         model: 'exa-research', // Should use standard model for quick research
         output: { 
@@ -184,8 +184,8 @@ describe('ResearchTopicTool', () => {
       let callCount = 0;
       const mockExaClient = {
         research: {
-          createTask: jest.fn().mockResolvedValue({ id: 'task-123' }),
-          getTask: jest.fn().mockImplementation(() => {
+          create: jest.fn().mockResolvedValue({ id: 'task-123' }),
+          get: jest.fn().mockImplementation(() => {
             callCount++;
             // Simulate task running for exactly 120 seconds (12 attempts * 10 seconds)
             if (callCount < 12) {
@@ -210,7 +210,7 @@ describe('ResearchTopicTool', () => {
         expect(result.content[0].text).toContain('Quick research completed');
       }
       // Should have made 12 calls (the max for quick research)
-      expect(mockExaClient.research.getTask).toHaveBeenCalledTimes(12);
+  expect(mockExaClient.research.get).toHaveBeenCalledTimes(12);
 
       // Restore original setTimeout
       global.setTimeout = originalSetTimeout;

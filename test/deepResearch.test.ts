@@ -139,8 +139,8 @@ describe('DeepResearchTool', () => {
 
       const mockExaClient = {
         research: {
-          createTask: jest.fn().mockResolvedValue({ id: 'task-123' }),
-          getTask: jest.fn().mockResolvedValue(mockTask)
+          create: jest.fn().mockResolvedValue({ id: 'task-123' }),
+          get: jest.fn().mockResolvedValue(mockTask)
         }
       };
       
@@ -153,7 +153,7 @@ describe('DeepResearchTool', () => {
       if (result.content[0]) {
         expect(result.content[0].text).toContain('Deep Research Results');
       }
-      expect(mockExaClient.research.createTask).toHaveBeenCalledWith({
+  expect(mockExaClient.research.create).toHaveBeenCalledWith({
         instructions: 'Complex research topic',
         model: 'exa-research-pro', // Should use pro model for deep research
         output: { 
@@ -185,8 +185,8 @@ describe('DeepResearchTool', () => {
       let callCount = 0;
       const mockExaClient = {
         research: {
-          createTask: jest.fn().mockResolvedValue({ id: 'task-123' }),
-          getTask: jest.fn().mockImplementation(() => {
+          create: jest.fn().mockResolvedValue({ id: 'task-123' }),
+          get: jest.fn().mockImplementation(() => {
             callCount++;
             // Simulate task running for a long time, then completing
             if (callCount < 18) { // 18 attempts * 10 seconds = 180 seconds
@@ -211,7 +211,7 @@ describe('DeepResearchTool', () => {
         expect(result.content[0].text).toContain('Long research completed');
       }
       // Should have made 18 calls (the max for deep research)
-      expect(mockExaClient.research.getTask).toHaveBeenCalledTimes(18);
+  expect(mockExaClient.research.get).toHaveBeenCalledTimes(18);
 
       // Restore original setTimeout
       global.setTimeout = originalSetTimeout;
