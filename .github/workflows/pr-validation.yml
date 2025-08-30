@@ -1,0 +1,76 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Show Node and npm versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate version is greater than published
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg_name=$(node -p "require('./package.json').name")
+          pkg_version=$(node -p "require('./package.json').version")
+          published_version=$(npm view "$pkg_name" version 2>/dev/null || echo "0.0.0")
+          
+          echo "Package: $pkg_name"
+          echo "Local version: $pkg_version"
+          echo "Published version: $published_version"
+          
+          # Use Node.js to compare semantic versions
+          comparison_result=$(node -e "
+            const semver = require('semver');
+            const localVer = '$pkg_version';
+            const publishedVer = '$published_version';
+            
+            if (!semver.valid(localVer)) {
+              console.error('Invalid local version format:', localVer);
+              process.exit(1);
+            }
+            
+            if (publishedVer !== '0.0.0' && !semver.valid(publishedVer)) {
+              console.error('Invalid published version format:', publishedVer);
+              process.exit(1);
+            }
+            
+            if (semver.gt(localVer, publishedVer)) {
+              console.log('✅ Version validation passed: ' + localVer + ' > ' + publishedVer);
+              process.exit(0);
+            } else {
+              console.error('❌ Version validation failed: ' + localVer + ' is not greater than ' + publishedVer);
+              console.error('Please increment the version in package.json');
+              process.exit(1);
+            }
+          ")
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test

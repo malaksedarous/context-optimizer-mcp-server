@@ -60,9 +60,12 @@ jobs:
           echo "Local version: $pkg_version"
           echo "Published version: $published_version"
 
-      - name: Skip publish (version unchanged)
+      - name: Fail if version already published
         if: steps.versions.outputs.published_version == steps.versions.outputs.package_version
-        run: echo "Version ${{ steps.versions.outputs.package_version }} already published; skipping."
+        run: |
+          echo "❌ ERROR: Version ${{ steps.versions.outputs.package_version }} is already published on npm!"
+          echo "Please update the version in package.json before publishing."
+          exit 1
 
       - name: Publish to npm
         if: steps.versions.outputs.published_version != steps.versions.outputs.package_version
