@@ -15,11 +15,12 @@ export interface MCPServerConfig {
   
   // LLM providers
   llm: {
-    provider: 'gemini' | 'claude' | 'openai';
+    provider: 'gemini' | 'claude' | 'openai' | 'openrouter';
     model?: string;                    // Optional custom model
     geminiKey?: string;
     claudeKey?: string;
     openaiKey?: string;
+    openrouterKey?: string;
   };
   
   // Research tools
