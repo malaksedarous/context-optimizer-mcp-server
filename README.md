@@ -6,6 +6,10 @@ A Model Context Protocol (MCP) server that provides context optimization tools f
 
 > This MCP server is the evolution of the [VS Code Copilot Context Optimizer extension](https://github.com/malaksedarous/vscode-copilot-context-optimizer), but with compatibility across MCP-supporting applications.
 
+<a href="https://glama.ai/mcp/servers/@malaksedarous/context-optimizer-mcp-server">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@malaksedarous/context-optimizer-mcp-server/badge" alt="Context Optimizer Server MCP server" />
+</a>
+
 ## 🎯 The Problem It Solves
 
 **Have you ever experienced this with your AI coding assistant (like Copilot, Claude Code, or Cursor)?**
