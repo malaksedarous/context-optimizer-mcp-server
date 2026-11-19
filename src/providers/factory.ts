@@ -8,6 +8,7 @@ import { BaseLLMProvider, LLMResponse } from './base';
 import { GeminiProvider } from './gemini';
 import { ClaudeProvider } from './claude';
 import { OpenAIProvider } from './openai';
+import { OpenRouterProvider } from './openrouter';
 
 export interface LLMProvider {
   processRequest(prompt: string, model?: string, apiKey?: string): Promise<LLMResponse>;
@@ -28,6 +29,9 @@ export class LLMProviderFactory {
           break;
         case 'openai':
           this.providers.set(providerName, new OpenAIProvider());
+          break;
+        case 'openrouter':
+          this.providers.set(providerName, new OpenRouterProvider());
           break;
         default:
           throw new Error(`Unknown provider: ${providerName}`);
