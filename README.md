@@ -9,8 +9,11 @@ A Model Context Protocol (MCP) server that provides context optimization tools f
 ## ❌ This project is obsolete and will not be maintained
 
 This project was short lived. It became obsolete very fast.
+
 With the evolution of agentic harnesses, generic subagents can do the work the tools here do with simple instructions in skill files. And Exa.ai made their own first party MCP server with similar tools. This leaves nothing useful in this MCP server.
+
 As the time of writing, we reached 2,690 total downloads on npm, with a peak of 612 downloads in one month.
+
 Thank you, and see you next project.
 
 <img width="500" alt="downloads graph" src="https://github.com/user-attachments/assets/27f1cbfc-b19f-49cd-9b86-c9f15d41d6d0" />
